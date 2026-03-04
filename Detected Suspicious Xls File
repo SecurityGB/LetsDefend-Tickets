@@ -1,0 +1,28 @@
+🛡️ Relatório de Investigação de Incidente: SOC138
+1. Resumo do Alerta
+ID do Evento: 77
+
+Nome da Regra: SOC138 - Detected Suspicious Xls File
+
+Data do Alerta: 13 de Março de 2021, 20:20
+
+Host Afetado: 172.16.17.56
+
+Técnica MITRE: T1112 (Evasão de Defesa - Modificação de Registro)
+
+2. Análise e Descobertas
+Análise do Artefato: O arquivo Excel suspeito foi submetido à análise no VirusTotal, retornando uma pontuação de 09/95, sendo classificado categoricamente como Malicioso/Suspeito.
+
+Estado do Endpoint: A investigação confirmou que a solução de segurança não colocou o malware em quarentena nem realizou a limpeza automática. O artefato permaneceu ativo no sistema até a intervenção manual do analista.
+
+Comunicação C2: Através da análise dos logs de rede (Proxy), foi confirmada uma solicitação externa para a URL http://stylefix.co/guillotine-cross/CTRNOQ/ (IP 177.53.143.89). Esta atividade caracteriza uma tentativa bem-sucedida de comunicação com um servidor de Comando e Controle (C2).
+
+3. Contenção e Mitigação
+Isolamento do Host: Devido à comunicação confirmada com C2 e ao estado ativo do malware, o endpoint 172.16.17.56 foi imediatamente colocado em estado de contenção (isolamento de rede) para evitar exfiltração de dados ou movimentação lateral.
+
+Verificação de Persistência: Seguindo a técnica MITRE T1112, recomenda-se uma revisão manual das chaves de registro no host para garantir que nenhum mecanismo de persistência tenha sido estabelecido pelo atacante.
+
+4. Veredito Final
+Classificação: Verdadeiro Positivo (TP)
+
+Status Final: Resolvido / Em Remediação.
