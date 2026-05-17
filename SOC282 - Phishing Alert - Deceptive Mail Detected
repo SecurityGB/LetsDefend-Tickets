@@ -31,6 +31,8 @@ Após a verificação da tarefa agendada, devemos deletar a tarefa e o arquivo/s
 Recomendo também uma varredura completa,
 E realizar Threat Hunting, usando o hash do arquivo .zip ou IP do do remetente/SMTP para garantir que nenhum outro usuário tenha sido recebeu ou clicou no mesmo e-mail.
 
+Obs: esse caso seria encaminhado a equipe de resposta a incidentes para as medidas necessárias.
+
 4. Veredito Final
 Classificação: Verdadeiro Positivo (TP)
 
