@@ -1,0 +1,37 @@
+🛡️ Relatório de Investigação de Incidente: SOC282
+1. Resumo do Alerta
+ID do Evento: 257
+
+Nome da Regra: SOC282 - Phishing Alert - Deceptive Mail Detected
+
+Data do Alerta: 13 de Maio de 2024 as 09:22AM
+
+Host Afetado: 172.16.20.151 - Usuário Felix (Felix@letsdefend.io)
+
+Técnica MITRE: T1082, T1087, T1057, T1016 e T1049, em resumo System Discovery e Persistência
+
+2. Análise e Descobertas
+Análise do Artefato: O e-mail além de ter o script coffee.zip em anexo, contem um botão que nos direconia para o seguinte link, a
+https://download.cyberlearn.academy/download/download?url=https://files-ld.s3.us-east-2.amazonaws.com/59cbd215-76ea-434d-93ca-4d6aec3bac98-free-coffee.zip
+Esse link se checarmos sua confiabilidade no virustotal, 14 anti-virus apontam algum tipo de agente malicioso, identificado como phishing e malware, entre demais indicações de que o link é suspeito ou malicioso.
+
+Estado do Endpoint: 
+No mesmo dia de tarde as 12:59 PM felix acessa o link https://files-ld.s3.us-east-2.amazonaws.com/59cbd215-76ea-434d-93ca-4d6aec3bac98-free-coffee.zip realizando possivelmente o download do conteúdo.
+Validando os comandos inseridos no terminal do user Felix após o acesso ao link,
+Identificamos uma tentativa reconhecimento interno e persistência, onde tivemos os seguintes TTPs praticados.
+T1082, T1087, T1057, T1016 e T1049, em resumo System Discovery e Persistência.
+
+Logo após o último comando de reconhecimento sendo route print (Discovery), as 13:01, temos o seguinte processo C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule,
+O que podemos identificar como um possível criação de processo de persistência, devido ao uso do Task Scheduler.
+Portanto sendo valido verificar qual tarefa foi criada na máquina do usuário.
+
+3. Contenção e Mitigação
+Como recomendação imediata, optei por isolar a máquina do usuário da rede a fim de evitar movimentações laterais e recomendo também a revogação das credenciais do usuário.
+Após a verificação da tarefa agendada, devemos deletar a tarefa e o arquivo/script que ela está chamando.
+Recomendo também uma varredura completa,
+E realizar Threat Hunting, usando o hash do arquivo .zip ou IP do do remetente/SMTP para garantir que nenhum outro usuário tenha sido recebeu ou clicou no mesmo e-mail.
+
+4. Veredito Final
+Classificação: Verdadeiro Positivo (TP)
+
+Status Final: Resolvido / Em Remediação.
