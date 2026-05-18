@@ -1,0 +1,50 @@
+🛡️ Relatório de Investigação de Incidente: SOC176
+1. Resumo do Alerta
+ID do Evento: 234
+
+Nome da Regra: SOC176 - RDP Brute Force Detected 
+
+Data do Alerta: 07 de março, de 2024 as 11:44.
+
+Host Afetado: :172.16.17.148 - Matthew
+
+Técnica MITRE: T1110, TA0001, T1087, T1069.001 e T1049, em resumo, RDP Bruteforce e técnicas de Discovery.
+
+2. Análise e Descobertas
+Análise do Artefato: Identificamos um ataque confirmado de RDP Brute Force (T1110) vindo do IP externo 
+218.92.0.56 direcionado ao host Matthew.
+As 11:44 temos diversas tentativas do IP 218.92.0.56 com EventID 4625,
+o que indica falha de login e sendo todas as tentativas no mesmo minuto,
+se caracteriza como um bruteforce, para tentar o acesso inicial (TA0001)
+E em certo momento para o usuário Matthew, temos um retorno 4624, vindo desse mesmo IP 
+218.92.0.56
+
+Estado do Endpoint: 
+As 11:45 o logo após o alerta, o usuário abre o cmd.exe, via interface gráfica (explorer.exe)
+iniciando a fase de discovery:
+
+O atacante executa um whoami, identificando o host e privilegios atuais,
+Seguido de net user letsdefend, o que ele utiliza para inspecionar detalhes
+especificos do usuário letsdefend (T1087);
+Seguido de net localgroup adimistrators, em que o atacante pode 
+mapear quem manda na máquina (T1069.001);
+Finalizando com netstat -ano onde o atacante quer ver todas as conexões de rede
+ativas e portas que a máquina esta ouvindo (T1049),
+isso serve para duas coisas, identificar se há ferramentas de monitoramento/segurança
+comunicando-se com a rede, ou mapear o terreno para uma movimentação lateral.
+
+Após isso não identificamos mais ações do atacante, ou seja, o atacante pulou as fases de instalação e C2, 
+o mesmo foi da fase de exploração para a fase de ação no objetivo de acordocom a cyberkillchain.
+
+3. Contenção e Mitigação
+A minha recomendação é a contenção imediata do host para impedir que o atacante prossiga,
+um reset das credenciais do Matthew e do user Letsdefend,
+Um encerramento de sessões RDP na máquina,
+Junto de um bloqueio para o IP 218.92.0.56 que foi o responsável pelo ataque.
+
+Obs: Esse caso será encaminhado a equipe de respostas de incidentes para medidas necessárias.
+
+4. Veredito Final
+Classificação: Verdadeiro Positivo (TP)
+
+Status Final: Contido o Ataque inicial / Designado ao IR 
