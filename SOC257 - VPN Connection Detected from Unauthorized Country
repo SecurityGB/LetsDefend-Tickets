@@ -8,21 +8,54 @@ Data do Alerta: 13 de Fevereiro de 2024 as 02:04 AM
 
 Host Afetado: 172.16.17.163
 
-Técnica MITRE: T1112 (Evasão de Defesa - Modificação de Registro)
+Técnica MITRE: T1078.002, T1556.006, T1082,T1016, T1049, T1518.001, T1087.001, T1518 e T1497
 
 2. Análise e Descobertas
-Análise do Artefato: O arquivo Excel suspeito foi submetido à análise no VirusTotal, retornando uma pontuação de 09/95, sendo classificado categoricamente como Malicioso/Suspeito.
+As 02:04 AM do dia 13 de fevereiro temos um alerta sobre uma conexão via VPN detectada de um país não autorizado.
 
-Estado do Endpoint: A investigação confirmou que a solução de segurança não colocou o malware em quarentena nem realizou a limpeza automática. O artefato permaneceu ativo no sistema até a intervenção manual do analista.
+Ao analisar o log, entre 02:01 as 02:03 temos algumas entradas no LOG do Firewall e Proxy,
+Temos retorno 200 de logon na vpn via web, que indica que houve sucesso ao realizar a parte do logon(T1078.002).
+Porém tendo falha 3 vezes ao inserir o código OTP(T1556.006),
+Ambas as solicitações vem do  113.161.158.12 que é um IP do Vietnã (considerado malicioso/malware pela analise do virustotal em 7 de 91 antivirus.), que originou o alerta ao tentar acessar a VPN
+33.33.33.33, utilizando o usuário da Monica.
 
-Comunicação C2: Através da análise dos logs de rede (Proxy), foi confirmada uma solicitação externa para a URL http://stylefix.co/guillotine-cross/CTRNOQ/ (IP 177.53.143.89). Esta atividade caracteriza uma tentativa bem-sucedida de comunicação com um servidor de Comando e Controle (C2).
+Ao analisarmos o e-mail da Monica, é identificado que ela recebeu 3 e-mails informando sua senha OTP, para passar 
+pelo 2FA.
+E juntamente temos 3 retornos do firewall de OTP incorreto, concluindo que o atacante não conseguiu acesso a máquina.
+
+Fora isso, não identificamos sucesso do atacante ao tentar acessar a VPN com o usuário da Monica.
+Só voltamos a ter acesso na máquina novamente após esse horário, as 05:20.
+
+Estado do Endpoint: 
+Analisando o EDR, no histórico dos navegadores não encontramos nenhum acesso a link suspeito,
+Porém ao analisar o log da CLI, das 08:00 as 10:45 AM no dia 13, nos temos entradas de comando na CLI como:
+
+systeminfo & ver: Comandos para visualizar a versão exata do sistema operacional e identificar vulnerabilidades (T1082)
+
+ipconfig /all & netstat -ano: Comandos para mapear a rede interna, conexões ativas e portas abertas (T1016 e T1049)
+
+tasklist & driverquery: Comandos para identificar softwares de segurança rodando (T1518.001) 
+
+net user: Listagem de contas de usuários locais e dominio (T1087.001)
+
+wmic product get name: Listar softwares instalados em busca de vetores de exploração ou ferramentas úteis (T1518)
+
+fsutil volume diskfree C: $ wmic memorychip get capacity: Validar o tamanho do ambiente, possivelmente para verificar
+se não estão em um Sandbox de analise (T1497)
+
+É possível concluir que o IP 113.161.158.12 não conseguiu acesso a máquina inicialmente.
+Porém os comandos executados no CLI são suspeitos, pois tratam-se de técnicas de discovery, o que é preocupante e deve ser analisado.
 
 3. Contenção e Mitigação
-Isolamento do Host: Devido à comunicação confirmada com C2 e ao estado ativo do malware, o endpoint 172.16.17.56 foi imediatamente colocado em estado de contenção (isolamento de rede) para evitar exfiltração de dados ou movimentação lateral.
 
-Verificação de Persistência: Seguindo a técnica MITRE T1112, recomenda-se uma revisão manual das chaves de registro no host para garantir que nenhum mecanismo de persistência tenha sido estabelecido pelo atacante.
+Sugiro imediatamente o isolamento do host da Monica para uma investigação mais aprofundada, 
+escalonando para o time de IR e validar o que foi comprometido na máquina.
+Reset das credenciais da Monica,
+Sendo valido também questionar a Monica se a mesma executou os comandos via CLI por algum motivo.
+Um bloqueio do IP 113.161.158.12 que tentou realizar o acesso a VPN e falhou 3 vezes, sendo um IP considerado malicioso.
+
 
 4. Veredito Final
 Classificação: Verdadeiro Positivo (TP)
 
-Status Final: Resolvido / Em Remediação.
+Status Final: Resolvido / Encaminhado ao IR
