@@ -1,0 +1,42 @@
+🛡️ Relatório de Investigação de Incidente: SOC251
+1. Resumo do Alerta
+ID do Evento: 214
+
+Nome da Regra: SOC251 - Quishing Detected (QR Code Phishing)
+
+Data do Alerta: 01 de janeiro de 2024 as 12:37 PM
+
+Host Afetado: Claire@letsdefend.io
+
+Técnica MITRE: T1564.011, T1566 e T1564.011
+
+2. Análise e Descobertas
+No dia 01 de janeiro de 2024, as 12:37 PM, claire recebeu um e-mail contendo um QR Code do endereço 
+security@microsecmfa.com (T1566.002), onde nosso sistema identificou como um Quishing (T1566)
+
+Ao scanear o QR Code, temos de retorno o seguinte link malicioso(T1564.011): 
+https://ipfs.io/ipfs/Qmbr8wmr41C35c3K2GfiP2F8YGzLhYpKpb4K66KU6mLmL4
+Sendo esse um link identificado como phishing/malicioso em 13/92 antivirus ao realizarmos uma analise no virustotal.
+O endereço SMTP 158.69.201.47 também uma analise de 7/91 no virustotal, associado a Phishing.
+
+Estado do Endpoint: 
+
+Ao analisarmos a máquina da Claire, não identificamos acesso suspeito no seu histórico de pesquisa,
+nem comandos suspeitos em seu terminal, podendo concluir que a máquina em si não foi comprometida.
+Sendo apenas uma tentativa de Quishing pelo e-mail.
+
+Esse alerta é um verdadeiro positivo, pois trata-se de uma tentativa de Quishing e o sistema identificou corretamente
+como evidenciado à cima.
+
+3. Contenção e Mitigação
+Apagar definitivamente essa mensagem do e-mail da claire,
+Realizar um bloqueio ao IP SMTP 158.69.201.47 que é considerado malicioso,
+Validar se outros membros da empresa receberam esse e-mail malicioso,
+Validar com a Claire se a mesma escaneou esse QR Code por algum dispositivo,
+Caso tenha sido escaneado, é ideal realizar um reset de senha preventivo para evitar possíveis explorações,
+
+
+4. Veredito Final
+Classificação: Verdadeiro Positivo (TP)
+
+Status Final: Resolvido / Em Remediação.
