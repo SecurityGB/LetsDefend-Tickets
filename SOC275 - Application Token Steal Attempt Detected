@@ -1,0 +1,67 @@
+🛡️ Relatório de Investigação de Incidente: SOC275 
+1. Resumo do Alerta
+ID do Evento: 250
+
+Nome da Regra: SOC275 - Application Token Steal Attempt Detected
+
+Data do Alerta: 19 de Abril de 2024 as 08:23 AM
+
+Host Afetado: 172.16.17.172
+
+Técnica MITRE: T1566.002 (Phishing: Spearphishing Link), T1598.003 - (Phishing for Information: Spearphishing Link) e T1078 (Valid Accounts / Contas Validas)
+
+2. Análise e Descobertas
+
+O alerta trata-se de uma requisição realizada ao site homespottersf.com pela usuária Gloriana, realizando um possível reset de senha , sendo gerado em 19 de abril de 2024 as 08:23 AM, gerado pelo IP 172.16.17.172
+
+A usuária afetada é a Gloriana, que possui o e-mail gloriana@letsdefend.io
+
+Inicialmente temos a seguinte requisição via web para o website homespottersf.com:
+
+GET /reset-password?email=gloriana@letsdefend.io HTTP/1.1
+
+O que retorna um código de status 302, código esse que indica que essa tentativa redirecionou a Gloriana para outra página.
+
+Em seguida no mesmo minuto, nós vemos a execução de mais uma requisção maliciosa no website as 08:23 AM, sendo a requisição:
+
+POST /reset-password?token=123letsdefendisthebest123 HTTP/1.1
+
+Como o status retornado é 200, previamente podemos concluir que a solicitação foi aceita com sucesso.
+
+Ao analisar o website homespottersf.com, pelo virustotal, ele é considerado malicioso por 1 antivirus.
+
+Ao analisar o e-mail de Gloriana, notamos que as 07:48 AM a recebeu um e-mail de phishing (T1566.002 - Phishing: Spearphishing Link), que solicita o reset de senha do discord por expiração. Ao clicar no botão do e-mail, a usuária é redirecionada ao link
+
+http://homespottersf.com:8081/reset-password?token=123letsdefendisthebest123  (T1598.003 - Phishing for Information: Spearphishing Link)
+
+Que como sabemos, teve o retorno  200, indicando sucesso.
+
+Estado do Endpoint: Ao analisarmos o END Point, não identificamos IoCs de invasão ou permanência, ao que indica a máquina da Gloriana em si não foi invadida. 
+Mas é interessante ressaltar que no playbook por segurança o LetsDefend recomenda a contenção da maquina da Gloriana.
+
+3. Contenção e Mitigação
+
+Ao que indica Gloriana sofreu um ataque de phishing, onde pode ter fornecido credenciais de acesso, acreditando estar redefinindo sua senha do discord ou algo do gênero. (T1078 - Valid Accounts / Contas Validas)
+
+Portanto o ideal como mitigação seria a entrar em contato com a Gloriana para entender quais credenciais/senhas a mesma forneceu ao site, e onde elas são aplicadas, visando mensurar o que pode ser explorado,
+procurando redefinir a senha nos ambientes que ela é utilizada.
+
+Isolamento do Host: Por recomendação do playbook, o host deve ser isolado, o que é valido, caso a Gloriana tenha fornecido alguma credêncial que permita acesso a sua máquina.
+
+4. Veredito Final
+Classificação: Verdadeiro Positivo (TP)
+
+Status Final: Em remediação, o caso será escalonado para o setor responsável realizar contato com a Gloriana e tomar as medidas necessárias para previnir o acesso
+as contas da Gloriana por agentes maliciosos.
+
+---
+
+Playbook:
+
+1 - Analisar URL nas ferramentas de 3a parte. Por favor, clique em "Malicioso" "se for malicioso e clique em" "Não-malicioso", se não for.
+
+R: Maliciosa
+
+2 - Alguém Acessou IP/URL/Domínio?
+
+R: Sim, a URL foi acessada pela Gloriana
