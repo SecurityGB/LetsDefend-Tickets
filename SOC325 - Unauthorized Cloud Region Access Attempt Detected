@@ -1,0 +1,61 @@
+🛡️ Relatório de Investigação de Incidente: SOC325
+1. Resumo do Alerta
+ID do Evento: 303
+
+Nome da Regra: SOC325 - Unauthorized Cloud Region Access Attempt Detected
+
+Data do Alerta: 24 de Setembro de 2024, as 08:21 AM
+
+Host Afetado: 52.15.206.21
+
+Técnica MITRE: T1110 (Brute Force) e T1078 (Valid Accounts)
+
+2. Análise e Descobertas
+
+O alarme fala sobre uma tentativa de acesso a uma conta, de uma região não autorizada as 08:21 AM, no dia 24 de Setembro de 2024.
+O sistema bloqueou o acesso.
+
+Analisando o LOG, notamos que as 07:25 se iniciam diversas tentativas de acesso ao usuário test@letsdefend.io (T1078 - Valid Accounts ou Contas Válidas) que se estendem até as 08:21 (T1110 - Brute Force), sendo essas tentativas bloqueadas por acesso não autorizado ligado a geolocalização do IP que tentava o acesso.
+
+Analisando o IP do atacante 134.209.145.73 no virustotal, encontramos considerações de antivirus, correlacionando o IP 134.209.145.73 a phishing e suspeito.
+
+Estado do Endpoint: Analisando o END Point, que seria a aplicação web no IP 52.15.206.21, não identificamos violação nos horários informados, o que nos confirma que não houve acesso efetivo do atacante.
+
+3. Contenção e Mitigação
+
+O Firewall bloqueou corretamente as tentativas de acesso de uma geolocalização diferente, portanto, o ataque já foi contido.
+
+4. Veredito Final
+Classificação: Verdadeiro Positivo (TP)
+
+Status Final: Resolvido 
+
+---
+
+Playbook: 
+
+1 - Qual é o sistema operacional do EndPoint?
+
+R: Linux
+
+2- Determine o tipo de Técnicas de Evasão de Defesa Envolvendo Ofuscação e Ocultação
+
+Região de nuvem não utilizada/não suportada
+
+3 - Análise do COI
+
+Durante a investigação, use logs de Log Management e Endpoint Security para caçar invasores IOCs. Avalie se algum COI encontrado é suspeito pelo seu comportamento e reputação. Você encontrou algum COI?
+
+Sim, o IP do atacante 134.209.145.73 é um COI.
+
+4 - Verifique a reputação do atacante no COI. O COI é ou não suspeito?
+
+Sim, como registrado na analise acima do incidente, é considerado suspeito por 4 antivirus.
+
+5 - Em sistemas de segurança de endpoints, gerenciamento de logs e segurança de e-mail, examine as IoCs identificadas durante a investigação. Se esses IoCs também estiverem presentes em outros dispositivos, esses dispositivos devem ser considerados afetados. Há mais de um aparelho afetado?
+
+Não, de acordo com os logs o IP 134.209.145.7 só tentou acesso ao destino 52.15.206.21
+
+6 - Sistemas que foram expostos a um ataque cibernético devem ser isolados para reduzir o impacto do ataque cibernético. O aparelho deve ser isolado?
+
+Não há necessidade, não houve sucesso no ataque.
