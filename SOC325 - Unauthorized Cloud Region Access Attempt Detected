@@ -54,7 +54,7 @@ Sim, como registrado na analise acima do incidente, é considerado suspeito por 
 
 5 - Em sistemas de segurança de endpoints, gerenciamento de logs e segurança de e-mail, examine as IoCs identificadas durante a investigação. Se esses IoCs também estiverem presentes em outros dispositivos, esses dispositivos devem ser considerados afetados. Há mais de um aparelho afetado?
 
-Não, de acordo com os logs o IP 134.209.145.7 só tentou acesso ao destino 52.15.206.21
+Não, de acordo com os logs o IP 134.209.145.73 só tentou acesso ao destino 52.15.206.21
 
 6 - Sistemas que foram expostos a um ataque cibernético devem ser isolados para reduzir o impacto do ataque cibernético. O aparelho deve ser isolado?
 
