@@ -1,0 +1,108 @@
+🛡️ Relatório de Investigação de Incidente: SOC127 
+1. Resumo do Alerta
+ID do Evento: 235
+
+Nome da Regra: SOC127 - SQL Injection Detected
+
+Data do Alerta: 07 de março de 2024 as 12:51 PM
+
+Host Afetado: 172.16.20.12 / WebServer1000
+
+Tática MITRE: T1595.002 (Reconnaissance), T1190 (Initial Access), T1059 (Execution), T1082 e T1083 (Discovery).
+
+2. Análise e Descobertas:
+
+O Alerta trata-se da identificação de um ataque de SQLi para o site WebServer1000 (172.16.20.12), vinda do IP 118.194.247.28.
+
+Analisando o IP 118.194.247.28 no virustotal, identificamos ele sendo considerado como malicioso/phishing em 9 antivirus.
+
+Decodificando o payload inserido nós temos:
+
+GET /?douj=3034 AND 1=1 UNION ALL SELECT 1,NULL,'<script>alert("XSS")</script>',table_name FROM information_schema.tables WHERE 2>1--/**/; EXEC xp_cmdshell('cat ../../../etc/passwd')#
+
+O que identificamos no payload inserido, é um típico de scanner automatizado, onde o atacante mistura técnicas de múltiplos bancos de dados e vulnerabilidades no mesmo parâmetro. 
+
+Destrinchando o payload, nós temos:
+
+a. Condição Lógica e Teste booleano:
+
+3034 AND 1=1 — teste inicial para verificar se o parâmetro é vulnerável a SQLi baseado em verdadeiro/falso. (T1190 - Exploit Public-Facing Application)
+
+b. Injeção UNION + Reflected XSS + Enumeração: 
+
+UNION ALL SELECT 1,NULL,'<script>alert("XSS")</script>',table_name FROM information_schema.tables WHERE 2>1 — Tentativa de extrair nomes de tabelas do banco de dados (information_schema) e injetar uma tag de script XSS para ver se o valor é refletido na tela.
+(T1059 - Command and Scripting Interpreter) e (T1082 - System Information Discovery) 
+
+c. Comentários de Evasão / Finalização: 
+
+-/**/ — Combina o comentário SQL (-), comentário em bloco  (/**/) e ponto e vírgula (;) para tentar truncar  a query original e concatenar um novo comando
+
+d. Tentativa de RCE (MSSQL):
+
+EXEC xp_cmdshell(…) — Tenta executar comandos de sistema operacional via procedimento do microsoft SQL Server (T1059 - Command and Scripting Interpreter)
+
+e. Comando de Leitura de Arquivo Linux 
+
+('cat ../../../etc/passwd') — Tenta ler o arquivo de senhas do linux (T1083 - File and Directory Discovery)
+
+f. Comentário de fim de linha:
+# — Comentário estilo MySQL/MariaDB para ignorar o restante da query original
+
+Agora que entendemos o payload inserido, focamos em um ponto crítico, a aplicação devolveu a resposta 200, o que indica que a solicitação foi recebida pelo servidor.
+
+Entendido o tipo de ataque que foi recebido, devemos investigar os logs e o Endpoint a fim de encontrar mais IoCs.
+
+Ao analisar o LOG, após o primeiro payload inserido as 12:51, vemos diversos payloads inseridos do IP 118.194.247.28 para o site de destino, 
+utilizando um scanner popular conhecido como SQLMap que é a ferramenta open-source mais famosa de automação para detecção e exploração de SQL Injection. 
+(T1595.002 - Active Scanning: Vulnerability Scanning)
+
+Observando que desde o primeiro payload o atacante já esta utilizando a ferramenta de maneira massiva para procurar vulnerabilidades contra o site. 
+
+Ao analisarmos todas as tentativas de varredura e exploração de SQL Injection, observamos que todas tem o retorno 200, com o mesmo valor de bytes recebidos 865, o que nos indica que o atacante aparentemente não teve sucesso em seu ataque, é bem possível que o atacante esteja recebendo apenas um retorno padrão do site para sua solicitação, nenhuma das tentativas de SQLI possui algum valor de bytes diferente.
+Porém para termos essa certeza, ideal é investigarmos os logs do Endpoint.
+
+Estado do Endpoint: Ao validar o endpoint não identificamos atividades referentes ao período do ataque, portanto é ideal que esse ticket seja escalonado ao Tier 2 para analise do banco de dados.
+
+3. Contenção e Mitigação
+
+De imediato bloquear o IP 118.194.247.28 em nosso firewall.
+E escalar para o Tier 2 analisar no banco de dados se houve comprometimento, apesar das respostas 200 tiverem a mesma quantia de bytes.
+4. Veredito Final
+
+Classificação: Verdadeiro Positivo (TP)
+
+Status Final: Escalonado ao Tier 2.
+
+---
+
+Playbook:
+
+1 - O Trânsito é Malicioso?
+
+R: Como evidenciado no relatório, é malicioso.
+
+2 - Qual é o Tipo de Ataque?
+
+R: Como evidenciado no relatório,  SQL Injection
+
+3 - Verifique Se É Um Teste Planejado
+
+Testes de penetração ou produtos de simulação de ataque podem acionar alarmes Falso Positivos se as regras não forem definidas corretamente. Verifique se o tráfego malicioso é resultado de um teste planejado.
+
+R: Não é um teste planejado
+
+Ao analisarmos os e-mails recebidos de janeiro de 2024 a abril de 2024, não identifiquei qualquer e-mail relacionado a um teste planejado. Também não encontramos essa informação no período informado se utilizarmos palavras-chaves referentes aos envolvidos.
+
+4 - Selecione a direção do tráfego malicioso nas opções disponíveis abaixo.
+
+**Formato:** Fonte -> Destino
+
+R: Internet > Rede da Empresa
+
+5 - O Ataque foi Bem Sucedido?
+
+R: Como evidenciado no relatório, aparentemente não.
+
+6 - Você Precisa de Escalação Tier 2?
+
+R: É valido a escalação para o Tier 2 validar como está o estado do banco de dados, devido as respostas 200 que a aplicação retornou, apesar dos bytes serem o mesmo em todas as respostas, é valido confirmar se houve algum tipo de violação, tendo em vista que ao analisarmos os dados fornecidos no Endpoint não identificamos atividades registradas no período do ataque.
